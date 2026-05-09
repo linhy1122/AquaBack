@@ -1,24 +1,63 @@
-# 应用服务 WEB 访问端口
-server.port=8080
+server:
+  port: 8899
+  servlet:
+    context-path: /Aqua  # 重要：记住访问时需要包含这个路径
 
-# THYMELEAF (ThymeleafAutoConfiguration)
-# 开启模板缓存（默认值： true ）
-spring.thymeleaf.cache=true
-# 检查模板是否存在，然后再呈现
-spring.thymeleaf.check-template=true
-# 检查模板位置是否正确（默认值 :true ）
-spring.thymeleaf.check-template-location=true
-#Content-Type 的值（默认值： text/html ）
-spring.thymeleaf.content-type=text/html
-# 开启 MVC Thymeleaf 视图解析（默认值： true ）
-spring.thymeleaf.enabled=true
-# 模板编码
-spring.thymeleaf.encoding=UTF-8
-# 要被排除在解析之外的视图名称列表，⽤逗号分隔
-spring.thymeleaf.excluded-view-names=
-# 要运⽤于模板之上的模板模式。另⻅ StandardTemplate-ModeHandlers( 默认值： HTML5)
-spring.thymeleaf.mode=HTML5
-# 在构建 URL 时添加到视图名称前的前缀（默认值： classpath:/templates/ ）
-spring.thymeleaf.prefix=classpath:/templates/
-# 在构建 URL 时添加到视图名称后的后缀（默认值： .html ）
-spring.thymeleaf.suffix=.html
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/Aqua?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER  # ✅ 解决Spring Boot 2.7兼容性问题
+  web:
+    resources:
+      static-locations: classpath:/META-INF/resources/, classpath:/resources/, classpath:/static/, classpath:/public/
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml
+  type-aliases-package: org.example.aquabackend
+  configuration:
+    map-underscore-to-camel-case: true
+
+# 启用详细日志以便调试
+logging:
+  level:
+    org.springframework.web: DEBUG
+    springfox: DEBUG
+
+knife4j:
+  # 开启增强配置
+  enable: true
+basic:
+  enable: true
+  # Basic认证用户名
+  username: test
+  # Basic认证密码
+  password: 123
+
+
+jwt:
+  secret: Ciallo!!!
+  expiration: 86400000 # 24 hours in ms
+#    knife4j:
+#      enable: true
+#      openapi:
+#        title: Knife4j官方文档
+#        description: "`我是测试`,**你知道吗**
+#        # aaa"
+#        email: xiaoymin@foxmail.com
+#        concat: 八一菜刀
+#        url: https://docs.xiaominfo.com
+#        version: v4.0
+#        license: Apache 2.0
+#        license-url: https://stackoverflow.com/
+#        terms-of-service-url: https://stackoverflow.com/
+#        group:
+#          test1:
+#            group-name: 分组名称
+#            api-rule: package
+#            api-rule-resources:
+#              - com.knife4j.demo.new3
