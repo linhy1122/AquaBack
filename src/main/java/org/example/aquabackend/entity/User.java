@@ -1,26 +1,47 @@
 package org.example.aquabackend.entity;
-
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @TableName("users")
 public class User {
 
-    @TableId(value = "user_id", type = IdType.AUTO)
-    private Integer userId;
+    @TableId(type = IdType.AUTO)
+    private Long id;
 
     private String username;
 
-    private String passwordHash;
+    private String password;
 
-    private String role;
+    private String email;
 
-    private String phone;
+    /** User role: ADMIN / USER / MANAGER */
+    private String role = "USER";
 
-    private LocalDateTime createdAt;
+    /** Account enabled status */
+    private Boolean enabled = true;
+
+    /** Account locked status */
+    private Boolean accountLocked = false;
+
+    /** Account expired status */
+    private Boolean accountExpired = false;
+
+    /** Credentials expired status */
+    private Boolean credentialsExpired = false;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    @TableLogic
+    private Integer deleted = 0;
 }
