@@ -30,6 +30,7 @@ mybatis-plus:
 
 knife4j:
   enable: true
+
 jwt:
   secret: Ciallo!!!
   expiration: 86400000 # 24小时（毫秒）

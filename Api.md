@@ -27,14 +27,30 @@
     - [9. 用户详情](#9-用户详情)
     - [10. 更新用户](#10-更新用户)
     - [11. 删除用户](#11-删除用户)
-  - [五、数据模型](#五数据模型)
-    - [5.1 统一响应（ApiResponse）](#51-统一响应apiresponse)
-    - [5.2 用户实体（User）](#52-用户实体user)
-    - [5.3 登录请求（LoginRequest）](#53-登录请求loginrequest)
-    - [5.4 注册请求（RegisterRequest）](#54-注册请求registerrequest)
-    - [5.5 创建用户请求（CreateUserRequest）](#55-创建用户请求createuserrequest)
-    - [5.6 脱敏用户信息（UserInfo）](#56-脱敏用户信息userinfo)
-  - [六、错误码说明](#六错误码说明)
+  - [五、数据概览（Dashboard）](#五数据概览dashboard)
+    - [12. 获取数据概览](#12-获取数据概览)
+  - [六、放养记录管理（Stocking）](#六放养记录管理stocking)
+    - [13. 分页查询放养记录](#13-分页查询放养记录)
+    - [14. 新增放养记录](#14-新增放养记录)
+    - [15. 编辑放养记录](#15-编辑放养记录)
+    - [16. 删除放养记录](#16-删除放养记录)
+  - [七、饲料库存管理（Feed）](#七饲料库存管理feed)
+    - [17. 查询饲料库存](#17-查询饲料库存)
+    - [18. 饲料入库](#18-饲料入库)
+    - [19. 饲料出库](#19-饲料出库)
+    - [20. 出入库流水明细](#20-出入库流水明细)
+  - [八、数据模型](#八数据模型)
+    - [8.1 统一响应（ApiResponse）](#81-统一响应apiresponse)
+    - [8.2 用户实体（User）](#82-用户实体user)
+    - [8.3 登录请求（LoginRequest）](#83-登录请求loginrequest)
+    - [8.4 注册请求（RegisterRequest）](#84-注册请求registerrequest)
+    - [8.5 创建用户请求（CreateUserRequest）](#85-创建用户请求createuserrequest)
+    - [8.6 脱敏用户信息（UserInfo）](#86-脱敏用户信息userinfo)
+    - [8.7 放养记录请求（StockingRecordDTO）](#87-放养记录请求stockingrecorddto)
+    - [8.8 饲料入库请求（FeedInStockDTO）](#88-饲料入库请求feedinstockdto)
+    - [8.9 饲料出库请求（FeedOutStockDTO）](#89-饲料出库请求feedoutstockdto)
+    - [8.10 数据概览（DashboardVO）](#810-数据概览dashboardvo)
+  - [九、错误码说明](#九错误码说明)
     - [常见业务错误消息](#常见业务错误消息)
   - [附录：完整接口速查表](#附录完整接口速查表)
 
@@ -518,9 +534,421 @@ Authorization: Bearer <admin_token>
 
 ---
 
-## 五、数据模型
+## 五、数据概览（Dashboard）
 
-### 5.1 统一响应（ApiResponse）
+> 公开接口，无需 Token。提供首页顶部 4 个卡片统计数据
+
+### 12. 获取数据概览
+
+> 返回存储总量、较上月增长率、饲料总库存、可用天数、本月消耗饲料
+
+```
+GET /api/dashboard/summary
+```
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalStock` | number | 存储总量（放养总数量，尾/只） |
+| `stockGrowthRate` | number | 较上月增长率（%） |
+| `feedStockKg` | number | 饲料总库存（kg） |
+| `feedAvailableDays` | number | 饲料可用天数（天） |
+| `monthlyFeedConsumed` | number | 本月消耗饲料（kg） |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "totalStock": 50000,
+    "stockGrowthRate": 12.5,
+    "feedStockKg": 2500.00,
+    "feedAvailableDays": 15,
+    "monthlyFeedConsumed": 5000.00
+  }
+}
+```
+
+---
+
+## 六、放养记录管理（Stocking）
+
+> 公开接口，无需 Token。管理养殖放养记录
+
+### 13. 分页查询放养记录
+
+> 支持塘口名称模糊搜索 + 品种名称精准筛选
+
+```
+GET /api/stocking/list?page=1&size=10&pondName=&species=
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `page` | number | 否 | `1` | 页码 |
+| `size` | number | 否 | `10` | 每页条数 |
+| `pondName` | string | 否 | — | 塘口名称（模糊搜索） |
+| `species` | string | 否 | — | 品种名称（精准筛选） |
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `records` | array | 放养记录列表 |
+| `total` | number | 总记录数 |
+| `page` | number | 当前页码 |
+| `size` | number | 每页条数 |
+
+**records 元素结构：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `batchId` | number | 批次 ID |
+| `pondId` | number | 塘口 ID |
+| `pondName` | string | 塘口名称 |
+| `species` | string | 品种名称 |
+| `stockCount` | number | 放养数量 |
+| `stockDate` | string | 放养日期 |
+| `status` | string | 状态 |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "records": [
+      {
+        "batchId": 1,
+        "pondId": 1,
+        "pondName": "1号塘",
+        "species": "南美白对虾",
+        "stockCount": 10000,
+        "stockDate": "2025-06-01",
+        "status": "active"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "size": 10
+  }
+}
+```
+
+---
+
+### 14. 新增放养记录
+
+```
+POST /api/stocking/add
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `pondId` | number | 是 | 不能为空 | `1` |
+| `species` | string | 是 | 不能为空 | `南美白对虾` |
+| `stockCount` | number | 是 | 必须大于 0 | `10000` |
+| `stockDate` | string | 是 | 日期格式 | `2025-06-01` |
+| `status` | string | 否 | — | `active` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "添加成功",
+  "data": {
+    "batchId": 1
+  }
+}
+```
+
+---
+
+### 15. 编辑放养记录
+
+```
+PUT /api/stocking/update
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `batchId` | number | 是 | 不能为空（编辑时必填） | `1` |
+| `pondId` | number | 是 | 不能为空 | `1` |
+| `species` | string | 是 | 不能为空 | `南美白对虾` |
+| `stockCount` | number | 是 | 必须大于 0 | `15000` |
+| `stockDate` | string | 是 | 日期格式 | `2025-06-15` |
+| `status` | string | 否 | — | `active` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "更新成功",
+  "data": {
+    "batchId": 1
+  }
+}
+```
+
+---
+
+### 16. 删除放养记录
+
+> 逻辑删除（将 status 置为 deleted）
+
+```
+DELETE /api/stocking/delete/{id}
+```
+
+**路径参数：**
+
+| 参数 | 类型 | 必填 | 说明 | 示例 |
+|------|------|------|------|------|
+| `id` | number | 是 | 批次 ID | `1` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "删除成功",
+  "data": {}
+}
+```
+
+---
+
+## 七、饲料库存管理（Feed）
+
+> 公开接口，无需 Token。管理饲料入库、出库与库存查询
+
+### 17. 查询饲料库存
+
+> 返回饲料库存明细列表（含实时库存状态和预计可用天数）
+
+```
+GET /api/feed/inventory?page=1&size=10&name=
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `page` | number | 否 | `1` | 页码 |
+| `size` | number | 否 | `10` | 每页条数 |
+| `name` | string | 否 | — | 饲料名称（模糊搜索） |
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `records` | array | 库存列表（含实时状态） |
+| `total` | number | 总记录数 |
+| `page` | number | 当前页码 |
+| `size` | number | 每页条数 |
+
+**records 元素结构：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `materialId` | number | 物料 ID |
+| `name` | string | 饲料名称 |
+| `category` | string | 类别 |
+| `unit` | string | 单位 |
+| `unitPrice` | number | 单价（元/kg） |
+| `currentStock` | number | 当前库存（kg） |
+| `stockStatus` | string | 库存状态（`充足` / `偏低`） |
+| `availableDays` | number | 预计可用天数 |
+
+> 库存状态实时计算（不持久化）：`currentStock >= 100` → `充足`，否则 → `偏低`
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "records": [
+      {
+        "materialId": 1,
+        "name": "对虾配合饲料",
+        "category": "饲料",
+        "unit": "kg",
+        "unitPrice": 150.00,
+        "currentStock": 500.00,
+        "stockStatus": "充足",
+        "availableDays": 50
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "size": 10
+  }
+}
+```
+
+---
+
+### 18. 饲料入库
+
+> 事务操作：增加库存 + 写入入库流水
+
+```
+POST /api/feed/inStock
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `materialId` | number | 是 | 不能为空 | `1` |
+| `quantity` | number | 是 | 必须大于 0 | `500` |
+| `unitPrice` | number | 否 | — | `150.00` |
+| `operator` | string | 否 | — | `张三` |
+| `remark` | string | 否 | — | `新批次饲料到货` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "入库成功",
+  "data": {
+    "materialId": 1,
+    "materialName": "对虾配合饲料",
+    "currentStock": 1000.00
+  }
+}
+```
+
+---
+
+### 19. 饲料出库
+
+> 事务操作：扣减库存 + 写入出库流水；校验库存不足时拒绝出库
+
+```
+POST /api/feed/outStock
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `materialId` | number | 是 | 不能为空 | `1` |
+| `quantity` | number | 是 | 必须大于 0 | `200` |
+| `batchId` | number | 否 | — | `1` |
+| `operator` | string | 否 | — | `张三` |
+| `remark` | string | 否 | — | `1号塘投喂` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "出库成功",
+  "data": {
+    "materialId": 1,
+    "materialName": "对虾配合饲料",
+    "currentStock": 300.00
+  }
+}
+```
+
+**错误响应（库存不足）：**
+
+```json
+{
+  "success": false,
+  "message": "库存不足！当前库存: 100.00 kg, 出库数量: 200.00 kg",
+  "data": {}
+}
+```
+
+---
+
+### 20. 出入库流水明细
+
+```
+GET /api/feed/records?page=1&size=10&materialId=
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `page` | number | 否 | `1` | 页码 |
+| `size` | number | 否 | `10` | 每页条数 |
+| `materialId` | number | 否 | — | 物料 ID（筛选） |
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `records` | array | 流水记录列表 |
+| `total` | number | 总记录数 |
+| `page` | number | 当前页码 |
+| `size` | number | 每页条数 |
+
+**records 元素结构：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `recordId` | number | 记录 ID |
+| `materialId` | number | 物料 ID |
+| `batchId` | number | 关联批次 ID |
+| `type` | string | 类型（`IN`=入库 / `OUT`=出库） |
+| `quantity` | number | 数量（kg） |
+| `totalCost` | number | 总成本（元） |
+| `recordDate` | string | 记录时间 |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "records": [
+      {
+        "recordId": 1,
+        "materialId": 1,
+        "batchId": null,
+        "type": "IN",
+        "quantity": 500.00,
+        "totalCost": 75000.00,
+        "recordDate": "2025-06-10T10:30:00"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "size": 10
+  }
+}
+```
+
+---
+
+## 八、数据模型
+
+### 8.1 统一响应（ApiResponse）
 
 ```json
 {
@@ -536,7 +964,7 @@ Authorization: Bearer <admin_token>
 | `message` | string | 服务器返回的提示信息 |
 | `data` | object | 业务数据的 Map，key-value 结构 |
 
-### 5.2 用户实体（User）
+### 8.2 用户实体（User）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -553,7 +981,7 @@ Authorization: Bearer <admin_token>
 | `updateTime` | LocalDateTime | 更新时间 |
 | `deleted` | Integer | 逻辑删除标记（0=正常，1=删除） |
 
-### 5.3 登录请求（LoginRequest）
+### 8.3 登录请求（LoginRequest）
 
 | 字段 | 类型 | 必填 | 校验规则 |
 |------|------|------|----------|
@@ -561,7 +989,7 @@ Authorization: Bearer <admin_token>
 | `password` | String | 是 | 至少 6 位 |
 | `captcha` | String | 否 | 验证码文本 |
 
-### 5.4 注册请求（RegisterRequest）
+### 8.4 注册请求（RegisterRequest）
 
 | 字段 | 类型 | 必填 | 校验规则 |
 |------|------|------|----------|
@@ -570,7 +998,7 @@ Authorization: Bearer <admin_token>
 | `email` | String | 是 | 邮箱格式 |
 | `captcha` | String | 否 | 验证码文本 |
 
-### 5.5 创建用户请求（CreateUserRequest）
+### 8.5 创建用户请求（CreateUserRequest）
 
 | 字段 | 类型 | 必填 | 默认值 | 校验规则 |
 |------|------|------|--------|----------|
@@ -580,7 +1008,7 @@ Authorization: Bearer <admin_token>
 | `role` | String | 否 | `USER` | `USER` / `MANAGER` / `ADMIN` |
 | `enabled` | Boolean | 否 | `true` | — |
 
-### 5.6 脱敏用户信息（UserInfo）
+### 8.6 脱敏用户信息（UserInfo）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -595,9 +1023,50 @@ Authorization: Bearer <admin_token>
 
 > 注意：UserInfo 不包含 `password`、`accountExpired`、`credentialsExpired`、`deleted` 等敏感或内部字段。
 
+### 8.7 放养记录请求（StockingRecordDTO）
+
+| 字段 | 类型 | 必填 | 校验规则 | 说明 |
+|------|------|------|----------|------|
+| `batchId` | Integer | 否 | — | 批次 ID（编辑时必填） |
+| `pondId` | Integer | 是 | `@NotNull` | 塘口 ID |
+| `species` | String | 是 | `@NotNull` | 品种名称 |
+| `stockCount` | Integer | 是 | `@Min(1)` | 放养数量 |
+| `stockDate` | LocalDate | 是 | `@NotNull` | 放养日期 |
+| `status` | String | 否 | — | 状态（默认 `active`） |
+
+### 8.8 饲料入库请求（FeedInStockDTO）
+
+| 字段 | 类型 | 必填 | 校验规则 | 说明 |
+|------|------|------|----------|------|
+| `materialId` | Integer | 是 | `@NotNull` | 物料 ID |
+| `quantity` | Double | 是 | `@Min(0)` | 入库数量（kg） |
+| `unitPrice` | Double | 否 | — | 单价（元/kg） |
+| `operator` | String | 否 | — | 操作人 |
+| `remark` | String | 否 | — | 备注 |
+
+### 8.9 饲料出库请求（FeedOutStockDTO）
+
+| 字段 | 类型 | 必填 | 校验规则 | 说明 |
+|------|------|------|----------|------|
+| `materialId` | Integer | 是 | `@NotNull` | 物料 ID |
+| `quantity` | Double | 是 | `@Min(0)` | 出库数量（kg） |
+| `batchId` | Integer | 否 | — | 关联养殖批次 ID |
+| `operator` | String | 否 | — | 操作人 |
+| `remark` | String | 否 | — | 备注 |
+
+### 8.10 数据概览（DashboardVO）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalStock` | Long | 存储总量（放养总数量） |
+| `stockGrowthRate` | Double | 较上月增长率（%） |
+| `feedStockKg` | Double | 饲料总库存（kg） |
+| `feedAvailableDays` | Integer | 饲料可用天数 |
+| `monthlyFeedConsumed` | Double | 本月消耗饲料（kg） |
+
 ---
 
-## 六、错误码说明
+## 九、错误码说明
 
 | HTTP 状态码 | 说明 | 典型场景 |
 |-------------|------|----------|
@@ -639,3 +1108,12 @@ Authorization: Bearer <admin_token>
 | 9 | `GET` | `/api/admin/users/{id}` | ✅ | ADMIN | 用户详情 |
 | 10 | `PUT` | `/api/admin/users/{id}` | ✅ | ADMIN | 更新用户 |
 | 11 | `DELETE` | `/api/admin/users/{id}` | ✅ | ADMIN | 删除用户 |
+| 12 | `GET` | `/api/dashboard/summary` | ❌ | — | 获取数据概览 |
+| 13 | `GET` | `/api/stocking/list` | ❌ | — | 分页查询放养记录 |
+| 14 | `POST` | `/api/stocking/add` | ❌ | — | 新增放养记录 |
+| 15 | `PUT` | `/api/stocking/update` | ❌ | — | 编辑放养记录 |
+| 16 | `DELETE` | `/api/stocking/delete/{id}` | ❌ | — | 删除放养记录 |
+| 17 | `GET` | `/api/feed/inventory` | ❌ | — | 查询饲料库存 |
+| 18 | `POST` | `/api/feed/inStock` | ❌ | — | 饲料入库 |
+| 19 | `POST` | `/api/feed/outStock` | ❌ | — | 饲料出库 |
+| 20 | `GET` | `/api/feed/records` | ❌ | — | 出入库流水明细 |

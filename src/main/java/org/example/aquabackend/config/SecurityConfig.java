@@ -46,6 +46,9 @@ public class SecurityConfig {
                 // 添加用户接口公开（POST 请求无需认证）
                 .antMatchers(HttpMethod.POST, "/api/admin/users").permitAll()
                 .antMatchers(
+                    "/api/dashboard/**",
+                    "/api/stocking/**",
+                    "/api/feed/**",
                     "/api/auth/**",
                     "/doc.html",
                     "/swagger-ui/**",
