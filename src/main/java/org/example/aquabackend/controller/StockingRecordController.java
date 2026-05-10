@@ -49,6 +49,21 @@ public class StockingRecordController {
                 .put("size", result.getSize());
     }
 
+    @GetMapping("/listByPond")
+    @ApiOperation(value = "按塘口分页查询放养记录", notes = "支持塘口ID筛选、品种名称筛选")
+    public ApiResponse listByPond(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer pondId,
+            @RequestParam(required = false) String species) {
+        IPage<Map<String, Object>> result = farmingBatchService.listByPond(page, size, pondId, species);
+        return ApiResponse.ok("查询成功")
+                .put("records", result.getRecords())
+                .put("total", result.getTotal())
+                .put("page", result.getCurrent())
+                .put("size", result.getSize());
+    }
+
     @PostMapping("/add")
     @ApiOperation(value = "新增放养记录", notes = "新增一条放养记录")
     public ApiResponse add(@Valid @RequestBody StockingRecordDTO dto) {

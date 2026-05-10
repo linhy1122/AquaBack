@@ -34,23 +34,37 @@
     - [14. 新增放养记录](#14-新增放养记录)
     - [15. 编辑放养记录](#15-编辑放养记录)
     - [16. 删除放养记录](#16-删除放养记录)
+    - [16b. 按塘口查询放养记录](#16b-按塘口查询放养记录)
   - [七、饲料库存管理（Feed）](#七饲料库存管理feed)
     - [17. 查询饲料库存](#17-查询饲料库存)
     - [18. 饲料入库](#18-饲料入库)
     - [19. 饲料出库](#19-饲料出库)
     - [20. 出入库流水明细](#20-出入库流水明细)
-  - [八、数据模型](#八数据模型)
-    - [8.1 统一响应（ApiResponse）](#81-统一响应apiresponse)
-    - [8.2 用户实体（User）](#82-用户实体user)
-    - [8.3 登录请求（LoginRequest）](#83-登录请求loginrequest)
-    - [8.4 注册请求（RegisterRequest）](#84-注册请求registerrequest)
-    - [8.5 创建用户请求（CreateUserRequest）](#85-创建用户请求createuserrequest)
-    - [8.6 脱敏用户信息（UserInfo）](#86-脱敏用户信息userinfo)
-    - [8.7 放养记录请求（StockingRecordDTO）](#87-放养记录请求stockingrecorddto)
-    - [8.8 饲料入库请求（FeedInStockDTO）](#88-饲料入库请求feedinstockdto)
-    - [8.9 饲料出库请求（FeedOutStockDTO）](#89-饲料出库请求feedoutstockdto)
-    - [8.10 数据概览（DashboardVO）](#810-数据概览dashboardvo)
-  - [九、错误码说明](#九错误码说明)
+  - [八、塘口管理（Pond）](#八塘口管理pond)
+    - [21. 分页查询塘口列表](#21-分页查询塘口列表)
+    - [22. 新增塘口](#22-新增塘口)
+    - [23. 编辑塘口](#23-编辑塘口)
+    - [24. 删除塘口](#24-删除塘口)
+    - [25. 获取塘口详情](#25-获取塘口详情)
+  - [九、统计数据（Statistic）](#九统计数据statistic)
+    - [26. 塘口统计数据](#26-塘口统计数据)
+    - [27. 放养统计数据](#27-放养统计数据)
+  - [十、数据模型](#十数据模型)
+    - [10.1 统一响应（ApiResponse）](#101-统一响应apiresponse)
+    - [10.2 用户实体（User）](#102-用户实体user)
+    - [10.3 登录请求（LoginRequest）](#103-登录请求loginrequest)
+    - [10.4 注册请求（RegisterRequest）](#104-注册请求registerrequest)
+    - [10.5 创建用户请求（CreateUserRequest）](#105-创建用户请求createuserrequest)
+    - [10.6 脱敏用户信息（UserInfo）](#106-脱敏用户信息userinfo)
+    - [10.7 放养记录请求（StockingRecordDTO）](#107-放养记录请求stockingrecorddto)
+    - [10.8 饲料入库请求（FeedInStockDTO）](#108-饲料入库请求feedinstockdto)
+    - [10.9 饲料出库请求（FeedOutStockDTO）](#109-饲料出库请求feedoutstockdto)
+    - [10.11 塘口请求（PondDTO）](#1011-塘口请求ponddto)
+    - [10.12 塘口实体（Pond）](#1012-塘口实体pond)
+    - [10.13 品种实体（Breed）](#1013-品种实体breed)
+    - [10.14 塘口统计响应（PondStatisticVO）](#1014-塘口统计响应pondstatisticvo)
+    - [10.15 放养统计响应（StockingStatisticVO）](#1015-放养统计响应stockingstatisticvo)
+  - [十一、错误码说明](#十一错误码说明)
     - [常见业务错误消息](#常见业务错误消息)
   - [附录：完整接口速查表](#附录完整接口速查表)
 
@@ -611,8 +625,12 @@ GET /api/stocking/list?page=1&size=10&pondName=&species=
 | `batchId` | number | 批次 ID |
 | `pondId` | number | 塘口 ID |
 | `pondName` | string | 塘口名称 |
+| `breedId` | number | 品种 ID |
 | `species` | string | 品种名称 |
 | `stockCount` | number | 放养数量 |
+| `currentNum` | number | 当前存活数量 |
+| `avgSpec` | number | 平均规格（g/尾） |
+| `survivalRate` | number | 存活率（%） |
 | `stockDate` | string | 放养日期 |
 | `status` | string | 状态 |
 
@@ -655,8 +673,12 @@ Content-Type: application/json
 | 字段 | 类型 | 必填 | 校验规则 | 示例 |
 |------|------|------|----------|------|
 | `pondId` | number | 是 | 不能为空 | `1` |
+| `breedId` | number | 否 | — | `1` |
 | `species` | string | 是 | 不能为空 | `南美白对虾` |
 | `stockCount` | number | 是 | 必须大于 0 | `10000` |
+| `currentNum` | number | 否 | — | `10000` |
+| `avgSpec` | number | 否 | — | `15.0` |
+| `survivalRate` | number | 否 | 0-100 | `85.0` |
 | `stockDate` | string | 是 | 日期格式 | `2025-06-01` |
 | `status` | string | 否 | — | `active` |
 
@@ -687,8 +709,12 @@ Content-Type: application/json
 |------|------|------|----------|------|
 | `batchId` | number | 是 | 不能为空（编辑时必填） | `1` |
 | `pondId` | number | 是 | 不能为空 | `1` |
+| `breedId` | number | 否 | — | `1` |
 | `species` | string | 是 | 不能为空 | `南美白对虾` |
 | `stockCount` | number | 是 | 必须大于 0 | `15000` |
+| `currentNum` | number | 否 | — | `12000` |
+| `avgSpec` | number | 否 | — | `18.0` |
+| `survivalRate` | number | 否 | 0-100 | `80.0` |
 | `stockDate` | string | 是 | 日期格式 | `2025-06-15` |
 | `status` | string | 否 | — | `active` |
 
@@ -727,6 +753,61 @@ DELETE /api/stocking/delete/{id}
   "success": true,
   "message": "删除成功",
   "data": {}
+}
+```
+
+---
+
+### 16b. 按塘口查询放养记录
+
+> 按塘口 ID 分页查询，支持品种名称筛选
+
+```
+GET /api/stocking/listByPond?page=1&size=10&pondId=1&species=
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `page` | number | 否 | `1` | 页码 |
+| `size` | number | 否 | `10` | 每页条数 |
+| `pondId` | number | 否 | — | 塘口 ID |
+| `species` | string | 否 | — | 品种名称（精准筛选） |
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `records` | array | 放养记录列表 |
+| `total` | number | 总记录数 |
+| `page` | number | 当前页码 |
+| `size` | number | 每页条数 |
+
+**records 元素结构** 同 13. 分页查询放养记录。
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "records": [
+      {
+        "batchId": 1,
+        "pondId": 1,
+        "pondName": "1号塘",
+        "species": "南美白对虾",
+        "stockCount": 10000,
+        "stockDate": "2025-06-01",
+        "status": "active"
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "size": 10
+  }
 }
 ```
 
@@ -817,11 +898,14 @@ Content-Type: application/json
 
 | 字段 | 类型 | 必填 | 校验规则 | 示例 |
 |------|------|------|----------|------|
-| `materialId` | number | 是 | 不能为空 | `1` |
+| `materialId` | number | 否 | 与 materialName 二选一 | `1` |
+| `materialName` | string | 否 | 与 materialId 二选一 | `对虾配合饲料` |
 | `quantity` | number | 是 | 必须大于 0 | `500` |
 | `unitPrice` | number | 否 | — | `150.00` |
 | `operator` | string | 否 | — | `张三` |
 | `remark` | string | 否 | — | `新批次饲料到货` |
+
+> **物料匹配规则**：优先按 `materialId` 查找；不存在时若有 `materialName` 则自动创建新物料；仅提供 `materialName` 时按名称查找或新建。
 
 **响应示例：**
 
@@ -946,9 +1030,293 @@ GET /api/feed/records?page=1&size=10&materialId=
 
 ---
 
-## 八、数据模型
+## 八、塘口管理（Pond）
 
-### 8.1 统一响应（ApiResponse）
+> 公开接口，无需 Token。管理塘口基础信息
+
+### 21. 分页查询塘口列表
+
+> 支持塘口名称模糊搜索 + 状态筛选
+
+```
+GET /api/pond/list?page=1&size=10&name=&status=
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| `page` | number | 否 | `1` | 页码 |
+| `size` | number | 否 | `10` | 每页条数 |
+| `name` | string | 否 | — | 塘口名称（模糊搜索） |
+| `status` | string | 否 | — | 状态（1-使用中, 2-空闲, 3-维修） |
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `records` | array | 塘口列表 |
+| `total` | number | 总记录数 |
+| `page` | number | 当前页码 |
+| `size` | number | 每页条数 |
+
+**records 元素结构：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `pondId` | number | 塘口 ID |
+| `code` | string | 塘口编号 |
+| `name` | string | 塘口名称 |
+| `area` | number | 面积（亩） |
+| `depth` | number | 水深（米） |
+| `waterSource` | string | 水源类型（1-地下水, 2-地表水, 3-海水） |
+| `location` | string | 位置/地址 |
+| `status` | string | 状态（1-使用中, 2-空闲, 3-维修） |
+| `manager` | string | 负责人 |
+| `createdAt` | string | 创建时间 |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "records": [
+      {
+        "pondId": 1,
+        "code": "P001",
+        "name": "1号南美白对虾塘",
+        "area": 5.0,
+        "depth": 1.8,
+        "waterSource": "1",
+        "location": "A区3号",
+        "status": "1",
+        "manager": "张三",
+        "createdAt": "2025-06-01T10:00:00"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "size": 10
+  }
+}
+```
+
+---
+
+### 22. 新增塘口
+
+```
+POST /api/pond/add
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `code` | string | 是 | 不能为空 | `P004` |
+| `name` | string | 是 | 不能为空 | `4号罗非鱼塘` |
+| `area` | number | 是 | 不能为空 | `6.0` |
+| `depth` | number | 否 | — | `1.5` |
+| `waterSource` | string | 否 | — | `1` |
+| `location` | string | 否 | — | `D区1号` |
+| `status` | string | 否 | — | `2` |
+| `manager` | string | 否 | — | `王五` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "添加成功",
+  "data": {
+    "pondId": 4
+  }
+}
+```
+
+---
+
+### 23. 编辑塘口
+
+```
+PUT /api/pond/update
+Content-Type: application/json
+```
+
+**请求体（JSON）：**
+
+| 字段 | 类型 | 必填 | 校验规则 | 示例 |
+|------|------|------|----------|------|
+| `pondId` | number | 是 | 不能为空（编辑时必填） | `4` |
+| `code` | string | 是 | 不能为空 | `P004` |
+| `name` | string | 是 | 不能为空 | `4号罗非鱼塘` |
+| `area` | number | 是 | 不能为空 | `6.5` |
+| `depth` | number | 否 | — | `1.8` |
+| `waterSource` | string | 否 | — | `2` |
+| `location` | string | 否 | — | `D区2号` |
+| `status` | string | 否 | — | `1` |
+| `manager` | string | 否 | — | `赵六` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "更新成功",
+  "data": {
+    "pondId": 4
+  }
+}
+```
+
+---
+
+### 24. 删除塘口
+
+> 软删除（将 `deleted` 标记置为 1）
+
+```
+DELETE /api/pond/delete/{id}
+```
+
+**路径参数：**
+
+| 参数 | 类型 | 必填 | 说明 | 示例 |
+|------|------|------|------|------|
+| `id` | number | 是 | 塘口 ID | `4` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "删除成功",
+  "data": {}
+}
+```
+
+---
+
+### 25. 获取塘口详情
+
+```
+GET /api/pond/{id}
+```
+
+**路径参数：**
+
+| 参数 | 类型 | 必填 | 说明 | 示例 |
+|------|------|------|------|------|
+| `id` | number | 是 | 塘口 ID | `1` |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "pond": {
+      "pondId": 1,
+      "code": "P001",
+      "name": "1号南美白对虾塘",
+      "area": 5.0,
+      "depth": 1.8,
+      "waterSource": "1",
+      "location": "A区3号",
+      "status": "1",
+      "manager": "张三",
+      "createdAt": "2025-06-01T10:00:00",
+      "deleted": 0
+    }
+  }
+}
+```
+
+---
+
+## 九、统计数据（Statistic）
+
+> 公开接口，无需 Token。提供塘口和放养两个维度的统计数据
+
+### 26. 塘口统计数据
+
+> 返回塘口总数、使用中数、空闲数、总养殖规模
+
+```
+GET /api/statistic/pond
+```
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalCount` | number | 塘口总数 |
+| `inUseCount` | number | 使用中塘口数 |
+| `idleCount` | number | 空闲塘口数 |
+| `totalArea` | number | 总养殖规模（亩） |
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "totalCount": 10,
+    "inUseCount": 6,
+    "idleCount": 3,
+    "totalArea": 55.5
+  }
+}
+```
+
+---
+
+### 27. 放养统计数据
+
+> 返回总放养量、当前存活量、平均存活率、总放养重量
+
+```
+GET /api/statistic/stocking
+```
+
+**响应参数（data 内）：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalStockingCount` | number | 总放养量（尾/只） |
+| `totalCurrentNum` | number | 当前存活总量（尾/只） |
+| `avgSurvivalRate` | number | 平均存活率（%） |
+| `totalWeight` | number | 总放养重量（kg） |
+
+**计算逻辑：**
+- 总放养重量 = `SUM(stock_count * avg_spec / 1000)`
+- 平均存活率 = `AVG(survival_rate)`，保留一位小数
+
+**响应示例：**
+
+```json
+{
+  "success": true,
+  "message": "查询成功",
+  "data": {
+    "totalStockingCount": 85000,
+    "totalCurrentNum": 72000,
+    "avgSurvivalRate": 84.7,
+    "totalWeight": 1275.50
+  }
+}
+```
+
+---
+
+## 十、数据模型
+
+### 10.1 统一响应（ApiResponse）
 
 ```json
 {
@@ -964,7 +1332,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `message` | string | 服务器返回的提示信息 |
 | `data` | object | 业务数据的 Map，key-value 结构 |
 
-### 8.2 用户实体（User）
+### 10.2 用户实体（User）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -981,7 +1349,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `updateTime` | LocalDateTime | 更新时间 |
 | `deleted` | Integer | 逻辑删除标记（0=正常，1=删除） |
 
-### 8.3 登录请求（LoginRequest）
+### 10.3 登录请求（LoginRequest）
 
 | 字段 | 类型 | 必填 | 校验规则 |
 |------|------|------|----------|
@@ -989,7 +1357,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `password` | String | 是 | 至少 6 位 |
 | `captcha` | String | 否 | 验证码文本 |
 
-### 8.4 注册请求（RegisterRequest）
+### 10.4 注册请求（RegisterRequest）
 
 | 字段 | 类型 | 必填 | 校验规则 |
 |------|------|------|----------|
@@ -998,7 +1366,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `email` | String | 是 | 邮箱格式 |
 | `captcha` | String | 否 | 验证码文本 |
 
-### 8.5 创建用户请求（CreateUserRequest）
+### 10.5 创建用户请求（CreateUserRequest）
 
 | 字段 | 类型 | 必填 | 默认值 | 校验规则 |
 |------|------|------|--------|----------|
@@ -1008,7 +1376,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `role` | String | 否 | `USER` | `USER` / `MANAGER` / `ADMIN` |
 | `enabled` | Boolean | 否 | `true` | — |
 
-### 8.6 脱敏用户信息（UserInfo）
+### 10.6 脱敏用户信息（UserInfo）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -1023,28 +1391,35 @@ GET /api/feed/records?page=1&size=10&materialId=
 
 > 注意：UserInfo 不包含 `password`、`accountExpired`、`credentialsExpired`、`deleted` 等敏感或内部字段。
 
-### 8.7 放养记录请求（StockingRecordDTO）
+### 10.7 放养记录请求（StockingRecordDTO）
 
 | 字段 | 类型 | 必填 | 校验规则 | 说明 |
 |------|------|------|----------|------|
 | `batchId` | Integer | 否 | — | 批次 ID（编辑时必填） |
 | `pondId` | Integer | 是 | `@NotNull` | 塘口 ID |
+| `breedId` | Integer | 否 | — | 品种 ID |
 | `species` | String | 是 | `@NotNull` | 品种名称 |
 | `stockCount` | Integer | 是 | `@Min(1)` | 放养数量 |
+| `currentNum` | Integer | 否 | — | 当前存活数量（默认等于放养数量） |
+| `avgSpec` | Double | 否 | — | 平均规格（g/尾） |
+| `survivalRate` | Double | 否 | `@DecimalMin(0)` `@DecimalMax(100)` | 存活率（%）0-100 |
 | `stockDate` | LocalDate | 是 | `@NotNull` | 放养日期 |
 | `status` | String | 否 | — | 状态（默认 `active`） |
 
-### 8.8 饲料入库请求（FeedInStockDTO）
+### 10.8 饲料入库请求（FeedInStockDTO）
 
 | 字段 | 类型 | 必填 | 校验规则 | 说明 |
 |------|------|------|----------|------|
-| `materialId` | Integer | 是 | `@NotNull` | 物料 ID |
+| `materialId` | Integer | 否 | 与 materialName 二选一 | 物料 ID（优先使用） |
+| `materialName` | String | 否 | 与 materialId 二选一 | 饲料名称（不存在时自动创建物料） |
 | `quantity` | Double | 是 | `@Min(0)` | 入库数量（kg） |
 | `unitPrice` | Double | 否 | — | 单价（元/kg） |
 | `operator` | String | 否 | — | 操作人 |
 | `remark` | String | 否 | — | 备注 |
 
-### 8.9 饲料出库请求（FeedOutStockDTO）
+> 物料匹配规则：优先按 `materialId` 查找物料；`materialId` 不存在但有 `materialName` 时自动创建新物料（类别=饲料，单位=kg）；仅提供 `materialName` 时按名称查找，不存在则新建。
+
+### 10.9 饲料出库请求（FeedOutStockDTO）
 
 | 字段 | 类型 | 必填 | 校验规则 | 说明 |
 |------|------|------|----------|------|
@@ -1054,19 +1429,68 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `operator` | String | 否 | — | 操作人 |
 | `remark` | String | 否 | — | 备注 |
 
-### 8.10 数据概览（DashboardVO）
+### 10.11 塘口请求（PondDTO）
+
+| 字段 | 类型 | 必填 | 校验规则 | 说明 |
+|------|------|------|----------|------|
+| `pondId` | Integer | 否 | — | 塘口 ID（编辑时必填） |
+| `code` | String | 是 | `@NotBlank` | 塘口编号 |
+| `name` | String | 是 | `@NotBlank` | 塘口名称 |
+| `area` | Double | 是 | `@NotNull` | 面积（亩） |
+| `depth` | Double | 否 | — | 水深（米） |
+| `waterSource` | String | 否 | — | 水源类型：1-地下水, 2-地表水, 3-海水 |
+| `location` | String | 否 | — | 位置/地址 |
+| `status` | String | 否 | — | 状态：1-使用中, 2-空闲, 3-维修 |
+| `manager` | String | 否 | — | 负责人 |
+
+### 10.12 塘口实体（Pond）
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `totalStock` | Long | 存储总量（放养总数量） |
-| `stockGrowthRate` | Double | 较上月增长率（%） |
-| `feedStockKg` | Double | 饲料总库存（kg） |
-| `feedAvailableDays` | Integer | 饲料可用天数 |
-| `monthlyFeedConsumed` | Double | 本月消耗饲料（kg） |
+| `pondId` | Integer | 塘口 ID（自动递增） |
+| `code` | String | 塘口编号 |
+| `name` | String | 塘口名称 |
+| `area` | Double | 面积（亩） |
+| `depth` | Double | 水深（米） |
+| `waterSource` | String | 水源类型：1-地下水, 2-地表水, 3-海水 |
+| `location` | String | 位置/地址 |
+| `status` | String | 状态：1-使用中, 2-空闲, 3-维修 |
+| `manager` | String | 负责人 |
+| `createdAt` | LocalDateTime | 创建时间 |
+| `deleted` | Integer | 软删除标记：0-正常, 1-删除 |
+
+### 10.13 品种实体（Breed）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `breedId` | Integer | 品种 ID（自动递增） |
+| `name` | String | 品种名称 |
+| `category` | String | 品种类别 |
+| `defaultSpec` | Double | 默认平均规格（g/尾） |
+| `remark` | String | 备注 |
+| `deleted` | Integer | 软删除标记：0-正常, 1-删除 |
+
+### 10.14 塘口统计响应（PondStatisticVO）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalCount` | Long | 塘口总数 |
+| `inUseCount` | Long | 使用中塘口数 |
+| `idleCount` | Long | 空闲塘口数 |
+| `totalArea` | Double | 总养殖规模（亩） |
+
+### 10.15 放养统计响应（StockingStatisticVO）
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `totalStockingCount` | Long | 总放养量 |
+| `totalCurrentNum` | Long | 当前存活总量 |
+| `avgSurvivalRate` | Double | 平均存活率（%） |
+| `totalWeight` | Double | 总放养重量（kg）= SUM(stock_count * avg_spec / 1000) |
 
 ---
 
-## 九、错误码说明
+## 十一、错误码说明
 
 | HTTP 状态码 | 说明 | 典型场景 |
 |-------------|------|----------|
@@ -1113,7 +1537,15 @@ GET /api/feed/records?page=1&size=10&materialId=
 | 14 | `POST` | `/api/stocking/add` | ❌ | — | 新增放养记录 |
 | 15 | `PUT` | `/api/stocking/update` | ❌ | — | 编辑放养记录 |
 | 16 | `DELETE` | `/api/stocking/delete/{id}` | ❌ | — | 删除放养记录 |
+| 17 | `GET` | `/api/stocking/listByPond` | ❌ | — | 按塘口分页查询放养记录 |
 | 17 | `GET` | `/api/feed/inventory` | ❌ | — | 查询饲料库存 |
 | 18 | `POST` | `/api/feed/inStock` | ❌ | — | 饲料入库 |
 | 19 | `POST` | `/api/feed/outStock` | ❌ | — | 饲料出库 |
 | 20 | `GET` | `/api/feed/records` | ❌ | — | 出入库流水明细 |
+| 21 | `GET` | `/api/pond/list` | ❌ | — | 分页查询塘口列表 |
+| 22 | `POST` | `/api/pond/add` | ❌ | — | 新增塘口 |
+| 23 | `PUT` | `/api/pond/update` | ❌ | — | 编辑塘口 |
+| 24 | `DELETE` | `/api/pond/delete/{id}` | ❌ | — | 删除塘口 |
+| 25 | `GET` | `/api/pond/{id}` | ❌ | — | 获取塘口详情 |
+| 26 | `GET` | `/api/statistic/pond` | ❌ | — | 塘口统计数据 |
+| 27 | `GET` | `/api/statistic/stocking` | ❌ | — | 放养统计数据 |

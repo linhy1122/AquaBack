@@ -27,4 +27,9 @@ public interface FarmingBatchService {
      * 删除放养记录
      */
     boolean delete(Integer id);
+
+    /**
+     * 按塘口分页查询放养记录
+     */
+    IPage<Map<String, Object>> listByPond(int page, int size, Integer pondId, String species);
 }

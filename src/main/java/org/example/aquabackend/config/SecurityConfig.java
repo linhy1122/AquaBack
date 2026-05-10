@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.POST, "/api/admin/users").permitAll()
                 .antMatchers(
                     "/api/dashboard/**",
+                    "/api/pond/**",
+                    "/api/statistic/**",
                     "/api/stocking/**",
                     "/api/feed/**",
                     "/api/auth/**",

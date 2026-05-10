@@ -78,29 +78,62 @@ public class FeedInventoryServiceImpl implements FeedInventoryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Material inStock(FeedInStockDTO dto) {
-        // 1. 检查物料是否存在
-        Material material = materialMapper.selectById(dto.getMaterialId());
+        // 1. 查找或创建物料
+        Material material = null;
+
+        if (dto.getMaterialId() != null) {
+            // 按 ID 查找
+            material = materialMapper.selectById(dto.getMaterialId());
+            if (material == null && dto.getMaterialName() != null) {
+                // ID 不存在但有名称，用名称新创建物料
+                material = createMaterial(dto.getMaterialName());
+            }
+        } else if (dto.getMaterialName() != null) {
+            // 按名称查找，不存在则创建
+            QueryWrapper<Material> qw = new QueryWrapper<>();
+            qw.eq("name", dto.getMaterialName());
+            material = materialMapper.selectOne(qw);
+            if (material == null) {
+                material = createMaterial(dto.getMaterialName());
+            }
+        }
+
         if (material == null) {
-            throw new RuntimeException("物料不存在");
+            throw new RuntimeException("请指定物料ID或饲料名称");
         }
 
         // 2. 增加库存
         Double oldStock = material.getStockQty() != null ? material.getStockQty() : 0;
         material.setStockQty(oldStock + dto.getQuantity());
+        material.setUnitPrice(dto.getUnitPrice() != null ? dto.getUnitPrice() : material.getUnitPrice());
         materialMapper.updateById(material);
 
         // 3. 写入入库流水
         InventoryRecord record = new InventoryRecord();
-        record.setMaterialId(dto.getMaterialId());
+        record.setMaterialId(material.getMaterialId());
         record.setType("IN");
         record.setQuantity(dto.getQuantity());
         record.setTotalCost(dto.getUnitPrice() != null ? dto.getQuantity() * dto.getUnitPrice() : 0);
         record.setRecordDate(LocalDateTime.now());
         inventoryRecordMapper.insert(record);
 
-        logger.info("Feed in-stock: materialId={}, quantity={}, newStock={}",
-                dto.getMaterialId(), dto.getQuantity(), material.getStockQty());
+        logger.info("Feed in-stock: materialId={}, name={}, quantity={}, newStock={}",
+                material.getMaterialId(), material.getName(), dto.getQuantity(), material.getStockQty());
         return material;
+    }
+
+    /**
+     * 按名称创建一个新的物料记录（类别=饲料）
+     */
+    private Material createMaterial(String name) {
+        Material m = new Material();
+        m.setName(name);
+        m.setCategory("饲料");
+        m.setUnit("kg");
+        m.setStockQty(0.0);
+        materialMapper.insert(m);
+        logger.info("Auto-created material: materialId={}, name={}", m.getMaterialId(), name);
+        return m;
     }
 
     @Override
