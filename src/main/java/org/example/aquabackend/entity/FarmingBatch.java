@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @TableName("stocking_record")
 public class FarmingBatch {
 
-    @TableId(value = "batch_id", type = IdType.AUTO)
+        @TableId(value = "id", type = IdType.AUTO)
     private Integer batchId;
 
     /** 塘口ID */

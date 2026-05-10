@@ -111,7 +111,7 @@ public class FeedInventoryServiceImpl implements FeedInventoryService {
         // 3. 写入入库流水
         InventoryRecord record = new InventoryRecord();
         record.setMaterialId(material.getMaterialId());
-        record.setType("IN");
+                    record.setType("in");
         record.setQuantity(dto.getQuantity());
         record.setTotalCost(dto.getUnitPrice() != null ? dto.getQuantity() * dto.getUnitPrice() : 0);
         record.setRecordDate(LocalDateTime.now());
@@ -161,8 +161,8 @@ public class FeedInventoryServiceImpl implements FeedInventoryService {
         // 4. 写入出库流水
         InventoryRecord record = new InventoryRecord();
         record.setMaterialId(dto.getMaterialId());
-        record.setBatchId(dto.getBatchId());
-        record.setType("OUT");
+                    record.setBatchId(dto.getBatchId());
+                    record.setType("out");
         record.setQuantity(dto.getQuantity());
         record.setTotalCost(null); // 出库暂不计算成本
         record.setRecordDate(LocalDateTime.now());
