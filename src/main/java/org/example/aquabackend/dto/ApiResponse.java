@@ -1,15 +1,24 @@
 package org.example.aquabackend.dto;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 统一 API 响应包装类
  */
+@ApiModel(value = "统一响应", description = "所有 API 的统一响应格式")
 public class ApiResponse {
 
+    @ApiModelProperty(value = "是否成功", required = true, example = "true", position = 1)
     private boolean success;
+
+    @ApiModelProperty(value = "提示信息", example = "操作成功", position = 2)
     private String message;
+
+    @ApiModelProperty(value = "响应数据", position = 3)
     private Map<String, Object> data;
 
     public ApiResponse() {

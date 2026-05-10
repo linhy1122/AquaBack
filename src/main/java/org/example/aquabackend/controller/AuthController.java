@@ -1,6 +1,10 @@
 package org.example.aquabackend.controller;
 
 import com.google.code.kaptcha.impl.DefaultKaptcha;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.example.aquabackend.dto.ApiResponse;
 import org.example.aquabackend.dto.LoginRequest;
 import org.example.aquabackend.dto.RegisterRequest;
@@ -25,6 +29,7 @@ import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/auth")
+@Api(value = "认证管理", tags = "认证接口（公开，无需 Token）")
 public class AuthController {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -38,21 +43,19 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    /**
-     * 获取验证码图片（Base64 格式）
-     */
     @GetMapping("/captcha")
+    @ApiOperation(value = "获取验证码", notes = "返回 Base64 格式的图片验证码，验证码存储在 Session 中，5分钟有效")
     public ResponseEntity<ApiResponse> getCaptcha(HttpSession session) throws IOException {
         String captchaText = captchaProducer.createText();
         session.setAttribute("captcha", captchaText);
-        session.setMaxInactiveInterval(300); // 5 分钟有效期
+        session.setMaxInactiveInterval(300);
 
         BufferedImage image = captchaProducer.createImage(captchaText);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "jpg", outputStream);
         String base64Image = Base64.getEncoder().encodeToString(outputStream.toByteArray());
 
-        logger.info("Generated captcha for session: {}", session.getId());
+        logger.info("Generated captcha for session: {}, captcha text: [{}] (for test)", session.getId(), captchaText);
 
         ApiResponse response = ApiResponse.ok("验证码生成成功")
                 .put("captchaImage", "data:image/jpeg;base64," + base64Image)
@@ -61,10 +64,11 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 用户登录（JSON 格式请求体）
-     */
     @PostMapping("/login")
+    @ApiOperation(value = "用户登录", notes = "使用用户名、密码和验证码登录，成功后返回 JWT Token")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "Authorization", value = "Bearer Token", required = false, paramType = "header", dataTypeClass = String.class)
+    })
     public ResponseEntity<ApiResponse> login(@Valid @RequestBody LoginRequest loginRequest,
                                               HttpSession session) {
         String username = loginRequest.getUsername();
@@ -73,7 +77,6 @@ public class AuthController {
 
         logger.info("Login attempt for user: {}", username);
 
-        // 验证码校验（如果传了验证码）
         if (captcha != null && !captcha.isEmpty()) {
             String sessionCaptcha = (String) session.getAttribute("captcha");
             if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(captcha)) {
@@ -82,14 +85,12 @@ public class AuthController {
             }
         }
 
-        // 查找用户
         User user = userService.findByUsername(username);
         if (user == null || !userService.checkPassword(password, user.getPassword())) {
             logger.warn("Invalid username or password for user: {}", username);
             return ResponseEntity.badRequest().body(ApiResponse.fail("用户名或密码错误"));
         }
 
-        // 检查账号状态
         if (Boolean.FALSE.equals(user.getEnabled())) {
             return ResponseEntity.status(403).body(ApiResponse.fail("账户已被禁用"));
         }
@@ -100,10 +101,7 @@ public class AuthController {
             return ResponseEntity.status(403).body(ApiResponse.fail("账户已过期"));
         }
 
-        // 生成 JWT Token
         String token = jwtUtil.generateToken(username);
-
-        // 登录成功后清除验证码
         session.removeAttribute("captcha");
 
         logger.info("User {} logged in successfully, role: {}", username, user.getRole());
@@ -117,10 +115,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 用户注册
-     */
     @PostMapping("/register")
+    @ApiOperation(value = "用户注册", notes = "注册新用户账号，注册成功后自动登录并返回 JWT Token")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest,
                                                  HttpSession session) {
         String username = registerRequest.getUsername();
@@ -130,7 +126,6 @@ public class AuthController {
 
         logger.info("Registration attempt for user: {}", username);
 
-        // 验证码校验
         if (captcha != null && !captcha.isEmpty()) {
             String sessionCaptcha = (String) session.getAttribute("captcha");
             if (sessionCaptcha == null || !sessionCaptcha.equalsIgnoreCase(captcha)) {
@@ -138,15 +133,11 @@ public class AuthController {
             }
         }
 
-        // 检查用户名是否已存在
         if (userService.findByUsername(username) != null) {
             return ResponseEntity.badRequest().body(ApiResponse.fail("用户名已存在"));
         }
 
-        // 注册用户
         User newUser = userService.register(username, password, email);
-
-        // 自动登录（生成 token）
         String token = jwtUtil.generateToken(username);
 
         logger.info("User registered successfully: {}", username);
@@ -159,10 +150,8 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 获取当前登录用户信息
-     */
     @GetMapping("/me")
+    @ApiOperation(value = "获取当前用户信息", notes = "获取当前已登录用户的详细信息（需携带 JWT Token）")
     public ResponseEntity<ApiResponse> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).body(ApiResponse.fail("未登录"));
@@ -179,20 +168,16 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * 退出登录
-     */
     @PostMapping("/logout")
+    @ApiOperation(value = "退出登录", notes = "销毁当前 Session（客户端需同时丢弃 Token）")
     public ResponseEntity<ApiResponse> logout(HttpSession session) {
         session.invalidate();
         return ResponseEntity.ok(ApiResponse.ok("退出登录成功"));
     }
 
-    /**
-     * 管理员专用测试端点
-     */
     @GetMapping("/admin/test")
     @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "管理员权限测试", notes = "用于测试当前用户是否具有 ADMIN 角色权限")
     public ResponseEntity<ApiResponse> adminTest() {
         return ResponseEntity.ok(ApiResponse.ok("您有管理员权限"));
     }

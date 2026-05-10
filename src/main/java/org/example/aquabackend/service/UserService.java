@@ -43,6 +43,9 @@ public class UserService {
         return userMapper.selectList(null);
     }
 
+    /**
+     * 用户自助注册（默认角色为 USER）
+     */
     public User register(String username, String password, String email) {
         User user = new User();
         user.setUsername(username);
@@ -53,6 +56,24 @@ public class UserService {
         userMapper.insert(user);
         logger.info("User registered: {}", username);
         return user;
+    }
+
+    /**
+     * 管理员创建用户（可指定角色）
+     */
+    public User createUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userMapper.insert(user);
+        logger.info("User created by admin: {} with role: {}", user.getUsername(), user.getRole());
+        return user;
+    }
+
+    /**
+     * 管理员更新用户信息
+     */
+    public void updateUser(User user) {
+        userMapper.updateById(user);
+        logger.info("User updated: {}", user.getId());
     }
 
     public boolean checkPassword(String rawPassword, String encodedPassword) {
