@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -35,6 +36,24 @@ public class GlobalExceptionHandler {
         logger.warn("Missing parameter: {}", e.getMessage());
         return ResponseEntity.badRequest()
                 .body(ApiResponse.fail("缺少必要参数：" + e.getParameterName()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(error -> error.getDefaultMessage())
+                .orElse("请求参数校验失败");
+        logger.warn("Validation failed: {}", message);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.fail(message));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException e) {
+        logger.warn("Illegal argument: {}", e.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.fail(e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)

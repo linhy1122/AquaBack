@@ -56,12 +56,36 @@ CREATE TABLE `devices`  (
   `device_id` int NOT NULL AUTO_INCREMENT,
   `pond_id` int NOT NULL,
   `device_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `device_type` enum('aerator','pump') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '增氧机/水泵',
+  `device_type` enum('aerator','pump','feeder') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '增氧机/水泵/投喂机',
   `status` enum('on','off','error') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'off',
+  `runtime_minutes` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '运行时长(分钟)',
+  `power_kw` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '功率(kW)',
+  `flow_rate` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '流量/投喂量',
+  `last_heartbeat` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `last_update` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`device_id`) USING BTREE,
   INDEX `pond_id`(`pond_id` ASC) USING BTREE,
   CONSTRAINT `devices_ibfk_1` FOREIGN KEY (`pond_id`) REFERENCES `ponds` (`pond_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for device_operation_logs
+-- ----------------------------
+DROP TABLE IF EXISTS `device_operation_logs`;
+CREATE TABLE `device_operation_logs`  (
+  `log_id` bigint NOT NULL AUTO_INCREMENT,
+  `device_id` int NOT NULL,
+  `pond_id` int NOT NULL,
+  `status` enum('on','off','error') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `runtime_minutes` decimal(10, 2) NULL DEFAULT 0.00,
+  `power_kw` decimal(10, 2) NULL DEFAULT 0.00,
+  `flow_rate` decimal(10, 2) NULL DEFAULT 0.00,
+  `recorded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`log_id`) USING BTREE,
+  INDEX `idx_device_time`(`device_id` ASC, `recorded_at` ASC) USING BTREE,
+  INDEX `idx_pond_time`(`pond_id` ASC, `recorded_at` ASC) USING BTREE,
+  CONSTRAINT `device_operation_logs_ibfk_1` FOREIGN KEY (`device_id`) REFERENCES `devices` (`device_id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `device_operation_logs_ibfk_2` FOREIGN KEY (`pond_id`) REFERENCES `ponds` (`pond_id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------

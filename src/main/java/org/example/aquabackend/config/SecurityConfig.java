@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .antMatchers(
                 "/api/dashboard/**",
                 "/api/pond/**",
+                "/api/device/**",
                 "/api/water-quality/**",
                 "/api/statistic/**",
                 "/api/stocking/**",

@@ -8,17 +8,15 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("devices")
-public class Device {
+@TableName("device_operation_logs")
+public class DeviceOperationLog {
 
-    @TableId(value = "device_id", type = IdType.AUTO)
+    @TableId(value = "log_id", type = IdType.AUTO)
+    private Long logId;
+
     private Integer deviceId;
 
     private Integer pondId;
-
-    private String deviceName;
-
-    private String deviceType;
 
     private String status;
 
@@ -28,7 +26,5 @@ public class Device {
 
     private Double flowRate;
 
-    private LocalDateTime lastHeartbeat;
-
-    private LocalDateTime lastUpdate;
+    private LocalDateTime recordedAt;
 }
