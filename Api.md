@@ -59,6 +59,7 @@
     - [10.7 放养记录请求（StockingRecordDTO）](#107-放养记录请求stockingrecorddto)
     - [10.8 饲料入库请求（FeedInStockDTO）](#108-饲料入库请求feedinstockdto)
     - [10.9 饲料出库请求（FeedOutStockDTO）](#109-饲料出库请求feedoutstockdto)
+    - [10.10 放养记录实体（FarmingBatch）](#1010-放养记录实体farmingbatch)
     - [10.11 塘口请求（PondDTO）](#1011-塘口请求ponddto)
     - [10.12 塘口实体（Pond）](#1012-塘口实体pond)
     - [10.13 品种实体（Breed）](#1013-品种实体breed)
@@ -998,7 +999,7 @@ GET /api/feed/records?page=1&size=10&materialId=
 | `recordId` | number | 记录 ID |
 | `materialId` | number | 物料 ID |
 | `batchId` | number | 关联批次 ID |
-| `type` | string | 类型（`IN`=入库 / `OUT`=出库） |
+| `type` | string | 类型（`in`=入库 / `out`=出库） |
 | `quantity` | number | 数量（kg） |
 | `totalCost` | number | 总成本（元） |
 | `recordDate` | string | 记录时间 |
@@ -1015,7 +1016,7 @@ GET /api/feed/records?page=1&size=10&materialId=
         "recordId": 1,
         "materialId": 1,
         "batchId": null,
-        "type": "IN",
+        "type": "in",
         "quantity": 500.00,
         "totalCost": 75000.00,
         "recordDate": "2025-06-10T10:30:00"
@@ -1429,6 +1430,25 @@ GET /api/statistic/stocking
 | `operator` | String | 否 | — | 操作人 |
 | `remark` | String | 否 | — | 备注 |
 
+### 10.10 放养记录实体（FarmingBatch）
+
+> 映射数据库表 `stocking_record`，主键列 `id`（Java 字段名 `batchId`）
+
+| 字段 | 类型 | 数据库列 | 说明 |
+|------|------|----------|------|
+| `batchId` | Integer | `id`（PK，自增） | 批次 ID（编辑时必填） |
+| `pondId` | Integer | `pond_id` | 塘口 ID |
+| `breedId` | Integer | `breed_id` | 品种 ID |
+| `species` | String | `species` | 品种名称 |
+| `stockCount` | Integer | `stock_count` | 放养数量 |
+| `currentNum` | Integer | `current_num` | 当前存活数量 |
+| `avgSpec` | Double | `avg_spec` | 平均规格（g/尾） |
+| `survivalRate` | Double | `survival_rate` | 存活率（%）0-100 |
+| `stockDate` | LocalDate | `stock_date` | 放养日期 |
+| `status` | String | `status` | 状态：`active`-正常, `deleted`-删除 |
+
+---
+
 ### 10.11 塘口请求（PondDTO）
 
 | 字段 | 类型 | 必填 | 校验规则 | 说明 |
@@ -1538,14 +1558,14 @@ GET /api/statistic/stocking
 | 15 | `PUT` | `/api/stocking/update` | ❌ | — | 编辑放养记录 |
 | 16 | `DELETE` | `/api/stocking/delete/{id}` | ❌ | — | 删除放养记录 |
 | 17 | `GET` | `/api/stocking/listByPond` | ❌ | — | 按塘口分页查询放养记录 |
-| 17 | `GET` | `/api/feed/inventory` | ❌ | — | 查询饲料库存 |
-| 18 | `POST` | `/api/feed/inStock` | ❌ | — | 饲料入库 |
-| 19 | `POST` | `/api/feed/outStock` | ❌ | — | 饲料出库 |
-| 20 | `GET` | `/api/feed/records` | ❌ | — | 出入库流水明细 |
-| 21 | `GET` | `/api/pond/list` | ❌ | — | 分页查询塘口列表 |
-| 22 | `POST` | `/api/pond/add` | ❌ | — | 新增塘口 |
-| 23 | `PUT` | `/api/pond/update` | ❌ | — | 编辑塘口 |
-| 24 | `DELETE` | `/api/pond/delete/{id}` | ❌ | — | 删除塘口 |
-| 25 | `GET` | `/api/pond/{id}` | ❌ | — | 获取塘口详情 |
-| 26 | `GET` | `/api/statistic/pond` | ❌ | — | 塘口统计数据 |
-| 27 | `GET` | `/api/statistic/stocking` | ❌ | — | 放养统计数据 |
+| 18 | `GET` | `/api/feed/inventory` | ❌ | — | 查询饲料库存 |
+| 19 | `POST` | `/api/feed/inStock` | ❌ | — | 饲料入库 |
+| 20 | `POST` | `/api/feed/outStock` | ❌ | — | 饲料出库 |
+| 21 | `GET` | `/api/feed/records` | ❌ | — | 出入库流水明细 |
+| 22 | `GET` | `/api/pond/list` | ❌ | — | 分页查询塘口列表 |
+| 23 | `POST` | `/api/pond/add` | ❌ | — | 新增塘口 |
+| 24 | `PUT` | `/api/pond/update` | ❌ | — | 编辑塘口 |
+| 25 | `DELETE` | `/api/pond/delete/{id}` | ❌ | — | 删除塘口 |
+| 26 | `GET` | `/api/pond/{id}` | ❌ | — | 获取塘口详情 |
+| 27 | `GET` | `/api/statistic/pond` | ❌ | — | 塘口统计数据 |
+| 28 | `GET` | `/api/statistic/stocking` | ❌ | — | 放养统计数据 |

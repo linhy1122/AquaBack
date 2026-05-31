@@ -22,5 +22,11 @@ public class WaterQualityData {
 
     private Double dissolvedOxygen;
 
+    private Double ammoniaNitrogen;
+
+    private Double nitrite;
+
+    private Double transparency;
+
     private LocalDateTime recordedAt;
 }
