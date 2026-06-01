@@ -36,10 +36,11 @@ public class UserController {
     private UserService userService;
 
     /**
-     * 添加用户（公开接口，无需登录）
+     * 添加用户（仅管理员）
      */
     @PostMapping
-    @ApiOperation(value = "添加用户", notes = "公开接口，无需认证。创建新用户，可指定用户名、密码、邮箱、角色和启用状态")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ApiOperation(value = "添加用户", notes = "仅管理员可创建用户。普通注册请使用注册接口；创建用户默认角色为 USER，服务器端不信任客户端传入的 ADMIN 权限。")
     public ResponseEntity<ApiResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         String username = request.getUsername();
         logger.info("Admin creating user: {}", username);
@@ -53,8 +54,8 @@ public class UserController {
         user.setUsername(username);
         user.setPassword(request.getPassword());
         user.setEmail(request.getEmail());
-        user.setRole(request.getRole() != null ? request.getRole() : "USER");
-        user.setEnabled(request.getEnabled() != null ? request.getEnabled() : true);
+        user.setRole("USER");
+        user.setEnabled(true);
 
         User createdUser = userService.createUser(user);
 
@@ -126,8 +127,6 @@ public class UserController {
 
         existingUser.setUsername(request.getUsername());
         existingUser.setEmail(request.getEmail());
-        existingUser.setRole(request.getRole() != null ? request.getRole() : existingUser.getRole());
-        existingUser.setEnabled(request.getEnabled() != null ? request.getEnabled() : existingUser.getEnabled());
 
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             userService.updatePassword(id, request.getPassword());

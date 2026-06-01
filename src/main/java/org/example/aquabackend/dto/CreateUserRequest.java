@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 /**
  * 管理员创建用户请求 DTO
  */
-@ApiModel(value = "创建用户请求", description = "管理员创建新用户所需的参数")
+@ApiModel(value = "创建用户请求", description = "管理员创建新用户所需的参数（角色默认为 USER，由服务端强制设定）")
 public class CreateUserRequest {
 
     @ApiModelProperty(value = "用户名", required = true, example = "zhangsan", position = 1)
@@ -29,13 +29,6 @@ public class CreateUserRequest {
     @NotBlank(message = "邮箱不能为空")
     @Email(message = "邮箱格式不正确")
     private String email;
-
-    @ApiModelProperty(value = "用户角色", allowableValues = "USER, MANAGER, ADMIN", example = "USER", position = 4)
-    @Pattern(regexp = "^(USER|MANAGER|ADMIN)$", message = "角色只能是 USER、MANAGER 或 ADMIN")
-    private String role = "USER";
-
-    @ApiModelProperty(value = "是否启用", example = "true", position = 5)
-    private Boolean enabled = true;
 
     public String getUsername() {
         return username;
@@ -61,19 +54,4 @@ public class CreateUserRequest {
         this.email = email;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Boolean getEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-    }
 }

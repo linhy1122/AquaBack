@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -42,9 +41,6 @@ public class SecurityConfig {
 
             // Configure authorization rules
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints (no authentication required)
-                // 添加用户接口公开（POST 请求无需认证）
-                .antMatchers(HttpMethod.POST, "/api/admin/users").permitAll()
                 .antMatchers(
                 "/api/dashboard/**",
                 "/api/pond/**",
