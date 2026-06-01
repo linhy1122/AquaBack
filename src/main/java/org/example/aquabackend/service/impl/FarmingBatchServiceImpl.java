@@ -77,6 +77,7 @@ public class FarmingBatchServiceImpl implements FarmingBatchService {
             // 查询塘口名称
             Pond pond = pondMapper.selectById(batch.getPondId());
             map.put("pondName", pond != null ? pond.getName() : "未知");
+            map.put("pondCode", pond != null ? pond.getCode() : null);
 
             records.add(map);
         }
@@ -176,6 +177,7 @@ public class FarmingBatchServiceImpl implements FarmingBatchService {
 
             Pond pond = pondMapper.selectById(batch.getPondId());
             map.put("pondName", pond != null ? pond.getName() : "未知");
+            map.put("pondCode", pond != null ? pond.getCode() : null);
 
             records.add(map);
         }

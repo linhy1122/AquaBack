@@ -8,11 +8,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("feeding_logs")
-public class FeedingLog {
+@TableName("feeding_plans")
+public class FeedingPlan {
 
-    @TableId(value = "log_id", type = IdType.AUTO)
-    private Integer logId;
+    @TableId(value = "plan_id", type = IdType.AUTO)
+    private Integer planId;
 
     private Integer pondId;
 
@@ -22,25 +22,27 @@ public class FeedingLog {
 
     private Integer batchId;
 
-    private Integer planId;
-
     private Integer materialId;
 
     private String materialName;
 
-    private Double plannedAmount;
-
-    private Double actualAmount;
+    private Double stockWeight;
 
     private Double feedRate;
 
-    private Double stockWeight;
+    private Double suggestedAmount;
+
+    private Double actualAmount;
+
+    private String status;
+
+    private LocalDateTime generatedAt;
+
+    private LocalDateTime executedAt;
 
     private String operator;
 
-    private String executeStatus;
+    private String calcReason;
 
-    private LocalDateTime feedTime;
-
-    private String remark;
+    private String factorsJson;
 }
