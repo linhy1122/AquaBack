@@ -44,7 +44,7 @@ public class WaterQualityServiceImpl implements WaterQualityService {
     }
 
     @Override
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 30000)
     public void simulateWaterQuality() {
         List<Pond> ponds = pondMapper.selectList(
                 new QueryWrapper<Pond>()

@@ -154,7 +154,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    @Scheduled(fixedDelay = 10000)
+    @Scheduled(fixedDelay = 30000)
     @Transactional(rollbackFor = Exception.class)
     public void simulateDevices() {
         List<Device> devices = deviceMapper.selectList(new QueryWrapper<Device>().orderByAsc("device_id"));
