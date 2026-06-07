@@ -20,7 +20,27 @@ public class AlarmLog {
 
     private String alarmValue;
 
+    private Double currentValue;
+
+    private Double thresholdMin;
+
+    private Double thresholdMax;
+
+    private String severity;
+
     private String status;
+
+    private String handleMethod;
+
+    private String handledBy;
+
+    private LocalDateTime handledAt;
+
+    private Integer triggerCount;
+
+    private LocalDateTime lastTriggeredAt;
+
+    private String remark;
 
     private LocalDateTime createdAt;
 }

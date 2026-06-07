@@ -50,6 +50,7 @@ public class SecurityConfig {
                 "/api/stocking/**",
                 "/api/feed/**",
                     "/api/report/**",
+                    "/api/alarm/**",
                     "/api/auth/**",
                     "/doc.html",
                     "/swagger-ui/**",

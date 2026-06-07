@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @TableName("alarm_thresholds")
 public class AlarmThreshold {
@@ -19,4 +21,10 @@ public class AlarmThreshold {
     private Double minValue;
 
     private Double maxValue;
+
+    private String severity;
+
+    private Integer enabled;
+
+    private LocalDateTime updatedAt;
 }

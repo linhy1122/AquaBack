@@ -5,6 +5,7 @@ import org.example.aquabackend.entity.Pond;
 import org.example.aquabackend.entity.WaterQualityData;
 import org.example.aquabackend.mapper.PondMapper;
 import org.example.aquabackend.mapper.WaterQualityDataMapper;
+import org.example.aquabackend.service.AlarmEvaluator;
 import org.example.aquabackend.service.WaterQualityService;
 import org.example.aquabackend.vo.WaterQualitySnapshotVO;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class WaterQualityServiceImpl implements WaterQualityService {
     @Autowired
     private WaterQualityDataMapper waterQualityDataMapper;
 
+    @Autowired
+    private AlarmEvaluator alarmEvaluator;
+
     @PostConstruct
     public void initWaterQualityData() {
         simulateWaterQuality();
@@ -59,6 +63,7 @@ public class WaterQualityServiceImpl implements WaterQualityService {
             WaterQualityData generated = buildNextRecord(pond.getPondId(), latest, now);
             batch.add(generated);
             waterQualityDataMapper.insert(generated);
+            alarmEvaluator.evaluate(generated);
         }
         logger.debug("Generated water quality records for {} ponds at {}", batch.size(), now);
     }
